@@ -28,7 +28,7 @@ from desktop.lib.test_utils import grant_access, add_to_group
 from desktop.models import Document
 
 from liboozie.oozie_api_tests import OozieServerProvider
-from oozie.models import Workflow, Node, Action, Start, Kill, End, Link
+from oozie.models import Workflow, Node, Start, Kill, End, Link
 
 
 LOG = logging.getLogger(__name__)
@@ -81,7 +81,7 @@ class TestJobsubWithHadoop(OozieServerProvider):
     #   - workflow name and description are the same as action name and description.
     #   - workflow has one action.
     assert_false(self.design.managed)
-    assert_equal(4, Action.objects.filter(workflow=self.design).count())
+    assert_equal(4, Node.objects.filter(workflow=self.design).count())
     assert_equal(1, Kill.objects.filter(workflow=self.design).count())
     assert_equal(1, Start.objects.filter(workflow=self.design).count())
     assert_equal(1, End.objects.filter(workflow=self.design).count())

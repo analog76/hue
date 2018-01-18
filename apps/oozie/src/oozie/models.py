@@ -264,6 +264,7 @@ class WorkflowManager(models.Manager):
 
   def new_workflow(self, owner):
     workflow = Workflow(owner=owner, schema_version=WorkflowManager.SCHEMA_VERSION['0.4'])
+    workflow.save()
 
     kill = Kill(name='kill', workflow=workflow, node_type=Kill.node_type)
     end = End(name='end', workflow=workflow, node_type=End.node_type)
@@ -273,14 +274,16 @@ class WorkflowManager(models.Manager):
     related = Link(parent=start, child=end, name='related')
 
     workflow.start = start
+    workflow.start.save()
     workflow.end = end
+    workflow.end.save()
 
     return workflow
 
   def initialize(self, workflow, fs=None):
     Kill.objects.create(name='kill', workflow=workflow, node_type=Kill.node_type)
-    end = End.objects.create(name='end', workflow=workflow, node_type=End.node_type)
-    start = Start.objects.create(name='start', workflow=workflow, node_type=Start.node_type)
+    end = End.objects.get(workflow=workflow)
+    start = Start.objects.get(workflow=workflow)
 
     link = Link(parent=start, child=end, name='to')
     link.save()
@@ -373,6 +376,7 @@ class Workflow(Job):
         name=copy.name,
         description=copy.description)
 
+    copy_doc.save()
     copy.doc.all().delete()
     copy.doc.add(copy_doc)
 
@@ -453,7 +457,7 @@ class Workflow(Job):
 
   @property
   def actions(self):
-    return Action.objects.filter(workflow=self, node_type__in=Action.types)
+    return Node.objects.filter(workflow=self, node_type__in=Action.types)
 
   @property
   def node_list(self):
